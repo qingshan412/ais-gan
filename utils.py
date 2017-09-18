@@ -355,7 +355,7 @@ def visualize(sess, dcgan, config, option):
         writer = csv.writer(f,delimiter = ',')
         writer.writerow(np.concatenate((vector,[label[idx]]),axis=0))
   #elif option == 10:
-  #  sample_z = np.random.uniform(-1, 1, size=(64, 100))
+  #  sample_z = np.random.uniform(-1, 1, [config.batch_size, dcgan.z_dim])
   #  generator = sess.run(dcgan.ais,feed_dict={dcgan.z: sample_z})
   #  prior = NormalPrior()
   #  kernel = ParsenDensityEstimator()

@@ -7,8 +7,13 @@ from utils import pp, visualize, to_json, show_all_variables
 
 import tensorflow as tf
 
+import tf_ais
+from priors import NormalPrior
+from kernels import ParsenDensityEstimator
+from scipy.stats import norm
+
 flags = tf.app.flags
-flags.DEFINE_integer("epoch", 25, "Epoch to train [25]")
+flags.DEFINE_integer("epoch", 2, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", np.inf, "The size of train images [np.inf]")
@@ -94,5 +99,17 @@ def main(_):
 
     # OPTION = 8
     # visualize(sess, dcgan, FLAGS, OPTION)
+    lld_num_samples = 10
+    prior = NormalPrior()
+    kernel = ParsenDensityEstimator()
+    model = tf_ais.Model(dcgan=dcgan, prior=prior, kernel=kernel, sigma=0.25, num_samples=lld_num_samples)#10000
+
+    data = glob(os.path.join("../data", FLAGS.dataset, '*', FLAGS.input_fname_pattern))
+    xx = np.reshape(data[0:lld_num_samples],(lld_num_samples,-1))
+
+    schedule = tf_ais.get_schedule(100, rad=4)
+    lld = model.ais(xx, schedule)
+
+
 if __name__ == '__main__':
   tf.app.run()

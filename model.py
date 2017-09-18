@@ -109,8 +109,8 @@ class DCGAN(object):
     self.z = tf.placeholder(
       tf.float32, [None, self.z_dim], name='z')
     # J.L.
-    zr = self.z 
-    tf.add_to_collection("zr", zr)
+    #zr = self.z 
+    #tf.add_to_collection("zr", zr)
 
     self.z_sum = histogram_summary("z", self.z)
     
@@ -429,9 +429,9 @@ class DCGAN(object):
         h6, self.h6_w, self.h6_b = deconv2d_d1(h5, [self.batch_size, s_h, s_w, self.c_dim], name='g_h6', with_w=True)
         
         # J.L.
-        gen_op = tf.nn.tanh(h6)
-        tf.add_to_collection("gen_op", gen_op)
-        return gen_op
+        #gen_op = tf.nn.tanh(h6)
+        #tf.add_to_collection("gen_op", gen_op)
+        return tf.nn.tanh(h6)#gen_op
       else:
         s_h, s_w = self.output_height, self.output_width
         s_h2, s_h4 = int(s_h/2), int(s_h/4)
@@ -534,41 +534,7 @@ class DCGAN(object):
       
       result = tf.concat([tf.reshape(h0p,[-1]),tf.reshape(h1p,[-1]),tf.reshape(h2p,[-1]),tf.reshape(h3p,[-1]),tf.reshape(h4p,[-1]),tf.reshape(h5,[-1])],0)
     return result
-  def ais(self, z, y=None):
-    
-    with tf.variable_scope("generator") as scope:
-      scope.reuse_variables()
-
-      s_h, s_w = self.output_height, self.output_width
-      s_h2, s_w2 = conv_out_size_same(s_h, 2), conv_out_size_same(s_w, 2)
-      s_h4, s_w4 = conv_out_size_same(s_h2, 2), conv_out_size_same(s_w2, 2)
-      s_h8, s_w8 = conv_out_size_same(s_h4, 2), conv_out_size_same(s_w4, 2)
-      s_h16, s_w16 = conv_out_size_same(s_h8, 2), conv_out_size_same(s_w8, 2)
-
-        # project `z` and reshape
-      self.z_ = linear(z, self.gf_dim*4*s_h8*s_w8, 'g_h0_lin')
-      self.h0 = tf.nn.relu(self.g_bn0(self.z_, train=False))
-
-      h0 = tf.reshape(self.h0, [-1, s_h8, s_w8, self.gf_dim * 4])
-      
-      self.h1= deconv2d_d2(h0, [self.batch_size, s_h4, s_w4, self.gf_dim*4],name='g_h1')
-      h1 = tf.nn.relu(self.g_bn1(self.h1, train=False))
-
-      h2 = deconv2d_d1(h1, [self.batch_size, s_h4, s_w4, self.gf_dim*2], name='g_h2')
-      h2 = tf.nn.relu(self.g_bn2(h2, train=False))
-
-      h3= deconv2d_d2(h2, [self.batch_size, s_h2, s_w2, self.gf_dim*2], name='g_h3')
-      h3 = tf.nn.relu(self.g_bn3(h3, train=False))
-
-      h4 = deconv2d_d1(h3, [self.batch_size, s_h2, s_w2, self.gf_dim],name='g_h4')
-      h4 = tf.nn.relu(self.g_bn4(h4, train=False))
-
-      h5 = deconv2d_d2(h4, [self.batch_size, s_h, s_w, self.gf_dim], name='g_h5')
-      h5 = tf.nn.relu(self.g_bn5(h5, train=False))
-
-      h6 = deconv2d_d1(h5, [self.batch_size, s_h, s_w, self.c_dim], name='g_h6')
-
-      return tf.nn.tanh(h6)
+  
   def load_mnist(self):
     data_dir = os.path.join("../data", self.dataset_name)
     

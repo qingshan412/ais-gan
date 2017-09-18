@@ -40,10 +40,12 @@ class Model(object):
         self.sess = tf.Session()
         #self.generator = generator
         self.dcgan = dcgan
+        self.input_dim = self.dcgan.z_dim
+        self.output_dim = self.dcgan.c_dim*self.dcgan.output_height*self.dcgan.output_width
         self.prior = prior
         self.kernel = kernel
-        self.x = tf.placeholder(tf.float32, [None, self.dcgan.generator.output_dim], name='x')
-        self.z = tf.placeholder(tf.float32, [None, self.dcgan.generator.input_dim], name='z')
+        self.x = tf.placeholder(tf.float32, [None, self.output_dim], name='x')
+        self.z = tf.placeholder(tf.float32, [None, self.input_dim], name='z')
         self.zv = None
         self.batch_size = tf.shape(self.x)[0]
         self.num_samples = num_samples
@@ -86,19 +88,21 @@ class Model(object):
         return self.sess.run(self.lld, feed_dict={self.t: t, self.x: x, self.z: self.zv})
 
     def energy_fn(self, z):
-        mu = self.dcgan.generator(z)
-        mu = tf.reshape(mu, [self.num_samples, self.batch_size, self.dcgan.generator.output_dim])
+        mu = self.sess.run(self.dcgan.sampler, feed_dict={self.dcgan.z: z})
+        mu = tf.reshape(mu, [self.num_samples, self.batch_size, self.output_dim])
         e = self.prior.logpdf(z) + self.t * tf.reshape(self.kernel.logpdf(self.x, mu, self.sigma), [self.num_samples * self.batch_size])
         return -e
 
     def ais(self, x, schedule):
         w = 0.0
-        self.zv = np.random.normal(0.0, 1.0, [x.shape[0] * self.num_samples, self.dcgan.generator.input_dim])
+        self.zv = np.random.normal(0.0, 1.0, [x.shape[0] * self.num_samples, self.input_dim])
         for (t0, t1) in zip(schedule[:-1], schedule[1:]):
             new_u = self.log_likelihood(x, t1)
             prev_u = self.log_likelihood(x, t0)
             w += new_u - prev_u
-            print(self.sess.run(self.kernel.logpdf(self.x, tf.reshape(self.dcgan.generator(self.zv), [self.num_samples, self.batch_size, self.dcgan.generator.output_dim]), self.sigma), feed_dict={self.x: x, self.z: self.zv}))
+            print(self.sess.run(self.kernel.logpdf(self.x, 
+                tf.reshape(self.sess.run(self.dcgan.sampler, feed_dict={self.dcgan.z: self.zv)}), 
+                [self.num_samples, self.batch_size, self.output_dim]), self.sigma), feed_dict={self.x: x, self.z: self.zv}))
             accept = self.step(x, t1)
             print('accept:')
             print(np.mean(accept))
