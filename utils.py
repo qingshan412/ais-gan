@@ -14,11 +14,11 @@ import numpy as np
 from glob import glob
 from time import gmtime, strftime
 from six.moves import xrange
-#import ais
-#import matplotlib.pyplot as plt
-#from priors import NormalPrior
-#from kernels import ParsenDensityEstimator
-#from scipy.stats import norm
+import ais
+import matplotlib.pyplot as plt
+from priors import NormalPrior
+from kernels import ParsenDensityEstimator
+from scipy.stats import norm
 
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
@@ -354,26 +354,26 @@ def visualize(sess, dcgan, config, option):
       with open('./feature_map_50k.csv','a') as f:
         writer = csv.writer(f,delimiter = ',')
         writer.writerow(np.concatenate((vector,[label[idx]]),axis=0))
-  #elif option == 10:
-  #  sample_z = np.random.uniform(-1, 1, [config.batch_size, dcgan.z_dim])
-  #  generator = sess.run(dcgan.ais,feed_dict={dcgan.z: sample_z})
-  #  prior = NormalPrior()
-  #  kernel = ParsenDensityEstimator()
-  #  model = ais.Model(generator, prior, kernel, 0.25, 10000)
-  #  # Get 100 f(x) values
-  #  p = norm()
-  #  x = np.linspace(norm.ppf(0.01, loc=3, scale=2), norm.ppf(0.99, loc=3, scale=2), 100)
-  #  p1 = norm.pdf(x, loc=3, scale=2)
-  #  xx = np.reshape(x, (100, 1))
-  #  print(schedule)
-  #  p2 = np.exp(model.ais(xx, schedule))
-  #  print(p2)
-  #
-  #  lld = model.ais(xx, schedule)
-  #  print('lld_mean:')
-  #  print(np.mean(lld))
-  #
-  #  schedule = ais.get_schedule(100, rad=4)
+  elif option == 10:
+    sample_z = np.random.uniform(-1, 1, size=(64, 100))
+    generator = sess.run(dcgan.ais,feed_dict={dcgan.z: sample_z})
+    prior = NormalPrior()
+    kernel = ParsenDensityEstimator()
+    model = ais.Model(generator, prior, kernel, 0.25, 10000)
+    # Get 100 f(x) values
+    p = norm()
+    x = np.linspace(norm.ppf(0.01, loc=3, scale=2), norm.ppf(0.99, loc=3, scale=2), 100)
+    p1 = norm.pdf(x, loc=3, scale=2)
+    xx = np.reshape(x, (100, 1))
+    print(schedule)
+    p2 = np.exp(model.ais(xx, schedule))
+    print(p2)
+
+    lld = model.ais(xx, schedule)
+    print('lld_mean:')
+    print(np.mean(lld))
+
+    schedule = ais.get_schedule(100, rad=4)
 def image_manifold_size(num_images):
   manifold_h = int(np.floor(np.sqrt(num_images)))
   manifold_w = int(np.ceil(np.sqrt(num_images)))
