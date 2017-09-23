@@ -7,20 +7,15 @@ from utils import pp, visualize, to_json, show_all_variables
 
 import tensorflow as tf
 
-import tf_ais
-from priors import NormalPrior
-from kernels import ParsenDensityEstimator
-from scipy.stats import norm
-
 flags = tf.app.flags
-flags.DEFINE_integer("epoch", 2, "Epoch to train [25]")
+flags.DEFINE_integer("epoch", 25, "Epoch to train [25]")
 flags.DEFINE_float("learning_rate", 0.0002, "Learning rate of for adam [0.0002]")
 flags.DEFINE_float("beta1", 0.5, "Momentum term of adam [0.5]")
 flags.DEFINE_integer("train_size", np.inf, "The size of train images [np.inf]")
 flags.DEFINE_integer("batch_size", 64, "The size of batch images [64]")
-flags.DEFINE_integer("input_height", 32, "The size of image to use (will be center cropped). [32]")
+flags.DEFINE_integer("input_height", 108, "The size of image to use (will be center cropped). [108]")
 flags.DEFINE_integer("input_width", None, "The size of image to use (will be center cropped). If None, same value as input_height [None]")
-flags.DEFINE_integer("output_height", 32, "The size of the output images to produce [32]")
+flags.DEFINE_integer("output_height", 64, "The size of the output images to produce [64]")
 flags.DEFINE_integer("output_width", None, "The size of the output images to produce. If None, same value as output_height [None]")
 flags.DEFINE_string("dataset", "celebA", "The name of dataset [celebA, mnist, lsun]")
 flags.DEFINE_string("input_fname_pattern", "*.jpg", "Glob pattern of filename of input images [*]")
@@ -47,6 +42,7 @@ def main(_):
   #gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
   run_config = tf.ConfigProto()
   run_config.gpu_options.allow_growth=True
+
   with tf.Session(config=run_config) as sess:
     if FLAGS.dataset == 'mnist':
       dcgan = DCGAN(
@@ -94,22 +90,8 @@ def main(_):
     #                 [dcgan.h4_w, dcgan.h4_b, None])
 
     # Below is codes for visualization
-    #OPTION = 10
-    #visualize(sess, dcgan, FLAGS, OPTION)
-
-    # OPTION = 8
-    # visualize(sess, dcgan, FLAGS, OPTION)
-    lld_num_samples = 10
-    prior = NormalPrior()
-    kernel = ParsenDensityEstimator()
-    model = tf_ais.Model(dcgan=dcgan, prior=prior, kernel=kernel, sigma=0.25, num_samples=lld_num_samples)#10000
-
-    data = glob(os.path.join("../data", FLAGS.dataset, '*', FLAGS.input_fname_pattern))
-    xx = np.reshape(data[0:lld_num_samples],(lld_num_samples,-1))
-
-    schedule = tf_ais.get_schedule(100, rad=4)
-    lld = model.ais(xx, schedule)
-
+    OPTION = 1
+    visualize(sess, dcgan, FLAGS, OPTION)
 
 if __name__ == '__main__':
   tf.app.run()
