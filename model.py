@@ -192,7 +192,8 @@ class DCGAN(object):
         batch_idxs = min(len(self.data_X), config.train_size) // config.batch_size
       else:      
         self.data = glob(os.path.join(
-          "./data", config.dataset, self.input_fname_pattern))
+          "../../data", self.dataset_name, '*', self.input_fname_pattern))
+          #"./data", config.dataset, self.input_fname_pattern))
         batch_idxs = min(len(self.data), config.train_size) // config.batch_size
 
       for idx in xrange(0, batch_idxs):
