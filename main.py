@@ -75,5 +75,7 @@ def main(_):
     # Below is codes for visualization
     OPTION = FLAGS.option
     visualize(sess, dcgan, FLAGS, OPTION)
+
+    AisEvaluation(sess, dcgan, FLAGS)
 if __name__ == '__main__':
   tf.app.run()

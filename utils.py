@@ -248,3 +248,4 @@ def image_manifold_size(num_images):
   manifold_w = int(np.ceil(np.sqrt(num_images)))
   assert manifold_h * manifold_w == num_images
   return manifold_h, manifold_w
+def AisEvaluation(sess, dcgan, config, option):
